@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "OLD Login System Prep AI",
+  "description": "OLD Prep AI Login System",
+  "version": "1.0",
+  "action": {
+    "default_popup": "popup/popup.html"
+  },
+  "icons": {
+    "16": "images/obj-16x16.png",
+    "32": "images/obj-32x32.png",
+    "48": "images/obj-48x48.png",
+    "128": "images/obj-128x128.png"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": ["storage"]
+}

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="" IE="edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login System Prep AI</title>
+    <link rel="stylesheet" href="bulma.min.css" />
+    <style>
+      html {
+        background-color: #08164e;
+      }
+
+      .title,
+      .label {
+        color: #fff; /* Set the text color to white */
+      }
+
+      #status {
+        color: #fff;
+        font-weight: bold;
+        text-align: center;
+        margin-top: 10px;
+      }
+
+      #welcome {
+        color: #fff;
+        font-weight: bold;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container m-3">
+      <h1 class="title">Prep AI - LogIn</h1>
+      <div class="field">
+        <label class="label">Status</label>
+        <span id="runningSpan" class="tag is-success">Logged In</span>
+        <span id="stoppedSpan" class="tag is-danger">Logged Out</span>
+      </div>
+    </div>
+
+    <div class="container m-3">
+      <div class="field">
+        <label class="label"> Email Id</label>
+        <div class="control">
+          <input type="text" class="input" id="emailId" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Password</label>
+        <div class="control">
+          <input type="password" class="input" id="password" />
+        </div>
+      </div>
+    </div>
+    <div class="container m-3">
+      <button class="button is-success is-fullwidth" id="signInButton">
+        Sign-In
+      </button>
+    </div>
+    <div class="container m-3">
+      <button class="button is-danger is-fullwidth" id="signOutButton">
+        Sign-Out
+      </button>
+    </div>
+
+    <div class="container m-3">
+      <div id="status"></div>
+    </div>
+    <div class="container m-3">
+      <div id="status"></div>
+      <div id="welcome"></div>
+    </div>
+  </body>
+
+  <script src="popup.js" type="module"></script>
+</html>
