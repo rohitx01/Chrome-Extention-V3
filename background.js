@@ -122,6 +122,79 @@ import fetchEmail from "./api/fetchEmails.js";
 //   chrome.storage.local.set({ prefs });
 // };
 
+// // ---------------------------------------------------------------
+// chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+//   if (message.event === "login") {
+//     const { email, password } = message;
+//     login(email, password)
+//       .then((response) => {
+//         sendResponse(response);
+//       })
+//       .catch((error) => {
+//         console.error("Error:", error);
+//         sendResponse({ success: false });
+//       });
+//     return true; // Keep the message port open until the async operation is complete
+//   } else if (message.event === "logout") {
+//     handleLogout();
+//     sendResponse({ success: true });
+//   }
+// });
+
+// function login(email, password) {
+//   const LOGIN_ENDPOINT = "https://stagingapi.prepai.io/login";
+//   return fetch(LOGIN_ENDPOINT, {
+//     method: "POST",
+//     body: JSON.stringify({
+//       email: email,
+//       password: password,
+//     }),
+//     headers: {
+//       "Content-type": "application/json; charset=UTF-8",
+//     },
+//   })
+//     .then((response) => response.json())
+//     .then((data) => {
+//       console.log(data);
+//       return data;
+//     });
+// }
+
+// function handleLogout() {
+//   // Handle logout logic here
+//   console.log("Logged out");
+// }
+
+// //text
+// function generateQuestions(formData) {
+//   const GENERATE_QUESTIONS_ENDPOINT =
+//     "https://stagingapi.prepai.io/generateQuestions";
+//   return fetch(GENERATE_QUESTIONS_ENDPOINT, {
+//     method: "POST",
+//     body: formData,
+//     headers: {
+//       "content-type": "multipart/form-data",
+//     },
+//   })
+//     .then((response) => {
+//       if (!response.ok) {
+//         throw new Error(
+//           "Error generating questions. HTTP status code: " + response.status
+//         );
+//       }
+//       return response.json();
+//     })
+//     .then((data) => {
+//       console.log(data);
+//       return data;
+//     })
+//     .catch((error) => {
+//       console.error(error);
+//       throw error;
+//     });
+// }
+//--------------------------------------------------------------------------------
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.event === "login") {
     const { email, password } = message;
@@ -133,10 +206,27 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         console.error("Error:", error);
         sendResponse({ success: false });
       });
-    return true; // Keep the message port open until the async operation is complete
+    return true;
   } else if (message.event === "logout") {
     handleLogout();
     sendResponse({ success: true });
+    return true;
+  } else if (message.event === "getSelectedText") {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      chrome.tabs.sendMessage(
+        tabs[0].id,
+        { event: "getSelectedText" },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            console.error(chrome.runtime.lastError);
+            sendResponse({ selectedText: null });
+          } else {
+            sendResponse({ selectedText: response.selectedText });
+          }
+        }
+      );
+    });
+    return true;
   }
 });
 
@@ -162,4 +252,32 @@ function login(email, password) {
 function handleLogout() {
   // Handle logout logic here
   console.log("Logged out");
+}
+
+function generateQuestions(formData) {
+  const GENERATE_QUESTIONS_ENDPOINT =
+    "https://stagingapi.prepai.io/generateQuestions";
+  return fetch(GENERATE_QUESTIONS_ENDPOINT, {
+    method: "POST",
+    body: formData,
+    headers: {
+      "content-type": "multipart/form-data",
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(
+          "Error generating questions. HTTP status code: " + response.status
+        );
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log(data);
+      return data;
+    })
+    .catch((error) => {
+      console.error(error);
+      throw error;
+    });
 }

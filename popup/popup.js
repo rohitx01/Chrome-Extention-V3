@@ -51,7 +51,99 @@ chrome.storage.local.get(["email", "password"], (result) => {
   }
 });
 
-//////assistive ball
+//////text
+// generateButton.onclick = () => {
+//   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+//     chrome.tabs.sendMessage(
+//       tabs[0].id,
+//       { event: "getSelectedText" },
+//       (response) => {
+//         if (chrome.runtime.lastError) {
+//           console.error(chrome.runtime.lastError);
+//           return;
+//         }
+
+//         if (response && response.selectedText) {
+//           const selectedText = response.selectedText.trim();
+//           console.log("Selected text:", selectedText);
+
+//           const formData = new FormData();
+//           formData.append("topic", "new question paper");
+//           formData.append("content", selectedText);
+//           formData.append("device", "Chrome Extension");
+//           console.log("Form data:", formData);
+
+//           chrome.runtime.sendMessage(
+//             { event: "generateQuestions", formData },
+//             (response) => {
+//               if (chrome.runtime.lastError) {
+//                 console.error(chrome.runtime.lastError);
+//                 return;
+//               }
+
+//               if (response && response.success) {
+//                 // Questions generated successfully
+//                 statusElement.textContent = "Questions generated successfully";
+//                 console.log("Questions are generated");
+//               } else {
+//                 // Error generating questions
+//                 statusElement.textContent = "Error generating questions";
+//                 console.error("Error generating questions:", response);
+//               }
+//             }
+//           );
+//         } else {
+//           console.log("No text selected");
+//         }
+//       }
+//     );
+//   });
+// };
+
+generateButton.onclick = () => {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    chrome.tabs.sendMessage(
+      tabs[0].id,
+      { event: "getSelectedText" },
+      (response) => {
+        if (chrome.runtime.lastError) {
+          console.error(chrome.runtime.lastError);
+          return;
+        }
+
+        if (response && response.selectedText) {
+          const selectedText = response.selectedText.trim();
+          console.log("Selected text:", selectedText);
+        } else {
+          console.log("No text selected");
+        }
+      }
+    );
+  });
+};
+
+// const generateButton = document.getElementById("generateButton");
+
+// generateButton.onclick = () => {
+//   const selectedText = window.getSelection().toString();
+//   if (selectedText) {
+//     chrome.runtime.sendMessage(
+//       { event: "generateQuestions", selectedText },
+//       (response) => {
+//         if (chrome.runtime.lastError) {
+//           console.error(chrome.runtime.lastError);
+//           return;
+//         }
+
+//         if (response && response.success) {
+//           console.log("Questions generated");
+//         } else {
+//           console.log("Generating questions failed");
+//         }
+//       }
+//     );
+//   }
+// };
 
 //-------------------------------------------------------
 // // Elements
