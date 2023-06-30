@@ -39,6 +39,14 @@ signOutButton.onclick = () => {
   welcomeElement.textContent = "";
 };
 
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.event === "loginSuccess") {
+    const loginInfo = message.loginInfo;
+    // Access the login information here and perform any necessary actions
+    console.log("Login information:", loginInfo);
+  }
+});
+
 chrome.storage.local.get(["email", "password"], (result) => {
   const { email, password } = result;
 
@@ -51,6 +59,94 @@ chrome.storage.local.get(["email", "password"], (result) => {
   }
 });
 
+// ...existing code...
+// ...existing code...
+
+const generateButton = document.getElementById("generateButton");
+
+// Add event listener for click event
+generateButton.onclick = () => {
+  const formData = new FormData();
+  formData.append("topic", "new question paper");
+  formData.append("content", "content you got from web, a long paragraph");
+  formData.append("device", "Chrome Extension");
+
+  chrome.runtime.sendMessage(
+    { event: "generateQuestions", formData },
+    (response) => {
+      if (response && response.success) {
+        console.log("Questions successfully generated");
+      } else {
+        console.log("Error generating questions");
+      }
+    }
+  );
+};
+
+// ...existing code...
+
+// function generateQuestions(formData) {
+//   const GENERATE_QUESTIONS_ENDPOINT =
+//     "https://stagingapi.prepai.io/generateQuestions";
+
+//   // Retrieve the access token from storage
+//   chrome.storage.local.get(["accessToken"], (result) => {
+//     const accessToken = result.accessToken;
+
+//     if (accessToken) {
+//       const requestOptions = {
+//         method: "POST",
+//         body: formData,
+//         headers: {
+//           Authorization: "Bearer " + accessToken,
+//           "content-type": "multipart/form-data",
+//         },
+//       };
+
+//       fetch(GENERATE_QUESTIONS_ENDPOINT, requestOptions)
+//         .then((response) => response.json())
+//         .then((data) => {
+//           console.log(data);
+//           return data;
+//         })
+//         .catch((error) => {
+//           console.error("Error generating questions:", error);
+//         });
+//     } else {
+//       console.error("Access token not found in storage");
+//     }
+//   });
+// }
+
+// ...existing code...
+
+// function generateQuestions(formData) {
+//   const GENERATE_QUESTIONS_ENDPOINT =
+//     "https://stagingapi.prepai.io/generateQuestions";
+//   return fetch(GENERATE_QUESTIONS_ENDPOINT, {
+//     method: "POST",
+//     body: formData,
+//     headers: {
+//       "content-type": "multipart/form-data",
+//     },
+//   })
+//     .then((response) => {
+//       if (!response.ok) {
+//         throw new Error(
+//           "Error generating questions. HTTP status code: " + response.status
+//         );
+//       }
+//       return response.json();
+//     })
+//     .then((data) => {
+//       console.log(data);
+//       return data;
+//     })
+//     .catch((error) => {
+//       console.error(error);
+//       throw error;
+//     });
+// }
 //////text
 // generateButton.onclick = () => {
 //   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -99,215 +195,28 @@ chrome.storage.local.get(["email", "password"], (result) => {
 //     );
 //   });
 // };
-
-generateButton.onclick = () => {
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    chrome.tabs.sendMessage(
-      tabs[0].id,
-      { event: "getSelectedText" },
-      (response) => {
-        if (chrome.runtime.lastError) {
-          console.error(chrome.runtime.lastError);
-          return;
-        }
-
-        if (response && response.selectedText) {
-          const selectedText = response.selectedText.trim();
-          console.log("Selected text:", selectedText);
-        } else {
-          console.log("No text selected");
-        }
-      }
-    );
-  });
-};
-
-// const generateButton = document.getElementById("generateButton");
-
+// generate text
 // generateButton.onclick = () => {
-//   const selectedText = window.getSelection().toString();
-//   if (selectedText) {
-//     chrome.runtime.sendMessage(
-//       { event: "generateQuestions", selectedText },
+//   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+//     chrome.tabs.sendMessage(
+//       tabs[0].id,
+//       { event: "getSelectedText" },
 //       (response) => {
 //         if (chrome.runtime.lastError) {
 //           console.error(chrome.runtime.lastError);
 //           return;
 //         }
 
-//         if (response && response.success) {
-//           console.log("Questions generated");
+//         if (response && response.selectedText) {
+//           const selectedText = response.selectedText.trim();
+//           console.log("Selected text:", selectedText);
 //         } else {
-//           console.log("Generating questions failed");
+//           console.log("No text selected");
 //         }
 //       }
 //     );
-//   }
-// };
-
-//-------------------------------------------------------
-// // Elements
-// const emailIdElement = document.getElementById("emailId");
-// const passwordElement = document.getElementById("password");
-
-// // Buttons
-// const signInButton = document.getElementById("signInButton");
-// const signOutButton = document.getElementById("signOutButton");
-
-// // Span listeners
-// const runningSpan = document.getElementById("runningSpan");
-// const stoppedSpan = document.getElementById("stoppedSpan");
-
-// const hideElement = (elem) => {
-//   elem.style.display = "none";
-// };
-// const showElement = (elem) => {
-//   elem.style.display = " ";
-// };
-// const disableElement = (elem) => {
-//   elem.disabled = true;
-// };
-// const eisableElement = (elem) => {
-//   elem.disabled = false;
-// };
-
-// signInButton.onclick = () => {
-//   const prefs = {
-//     emailId: emailIdElement.value,
-//     password: passwordElement.value,
-//   };
-//   chrome.runtime.sendMessage({ event: "onStart", prefs });
-// };
-
-// signOutButton.onclick = () => {
-//   chrome.runtime.sendMessage({ event: "onStop" });
-// };
-
-// chrome.storage.local.get(["emailId", "password", "emails"], (result) => {
-//   const { emailId, password, emails } = result;
-
-//   if (emailId) {
-//     emailIdElement.value = emailId;
-//   }
-
-//   if (password) {
-//     passwordElement.value = password;
-//   }
-//   //   if (isRunning) {
-//   //     showElement(runningSpan);
-//   //     hideElement(stoppedSpan);
-//   //   } else {
-//   //     showElement(stoppedSpan);
-//   //     hideElement(runningSpan);
-//   //   }
-// });
-
-//----------------------------------------------------------------------------
-
-// // Elements
-// const emailIdElement = document.getElementById("emailId");
-// const passwordElement = document.getElementById("password");
-
-// // Buttons
-// const signInButton = document.getElementById("signInButton");
-// const signOutButton = document.getElementById("signOutButton");
-
-// // Span listeners
-// const runningSpan = document.getElementById("runningSpan");
-// const stoppedSpan = document.getElementById("stoppedSpan");
-
-// const hideElement = (elem) => {
-//   elem.style.display = "none";
-// };
-
-// const showElement = (elem) => {
-//   elem.style.display = "";
-// };
-
-// const disableElement = (elem) => {
-//   elem.disabled = true;
-// };
-
-// const enableElement = (elem) => {
-//   elem.disabled = false;
-// };
-
-// signInButton.onclick = () => {
-//   const prefs = {
-//     emailId: emailIdElement.value,
-//     password: passwordElement.value,
-//   };
-//   chrome.runtime.sendMessage({ event: "onStart", prefs }, () => {
-//     console.log("Message sent to background");
 //   });
 // };
+// ...existing code...
 
-// // signInButton.onclick = () => {
-// //   const prefs = {
-// //     emailId: emailIdElement.value,
-// //     password: passwordElement.value,
-// //   };
-// //   chrome.runtime.sendMessage({ event: "onStart", prefs }, (response) => {
-// //     console.log("Message sent to background");
-// //     if (response && response.success) {
-// //       // Open a new popup with the dashboard.html
-// //       chrome.windows.create({
-// //         url: "popup/dashboard.html",
-// //         type: "popup",
-// //         width: 800,
-// //         height: 600,
-// //       });
-// //     } else {
-// //       console.log("Failed to sign in:", response);
-// //       // Handle the error or display an error message to the user
-// //     }
-// //   });
-// // };
-
-// signOutButton.onclick = () => {
-//   chrome.runtime.sendMessage({ event: "onStop" }, () => {
-//     console.log("Message sent to background");
-//   });
-// };
-
-// chrome.storage.local.get(["prefs"], (result) => {
-//   const { prefs } = result;
-
-//   if (prefs && prefs.emailId) {
-//     emailIdElement.value = prefs.emailId;
-//   }
-// });
-
-// // ...
-
-// chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-//   const { event, prefs, selectedText } = message;
-//   switch (event) {
-//     case "onStop":
-//       handleOnStop();
-//       break;
-//     case "onStart":
-//       handleOnStart(prefs);
-//       break;
-//     case "onTextSelect":
-//       handleTextSelect(selectedText);
-//       break;
-//     default:
-//       break;
-//   }
-//   sendResponse();
-// });
-
-// function handleTextSelect(selectedText) {
-//   if (selectedText) {
-//     // Open the popup window when text is selected
-//     chrome.windows.create({
-//       url: "popup.html",
-//       type: "popup",
-//       width: 800,
-//       height: 600,
-//     });
-//   }
-// }
-
-// // ...
+// generate text
