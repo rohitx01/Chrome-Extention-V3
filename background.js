@@ -90,7 +90,7 @@
 //   console.log("prefs received", prefs);
 //   chrome.storage.local.set({ prefs });
 // };
-import fetchEmail from "./api/fetchEmails.js";
+// import fetchEmail from "./api/fetchEmails.js";
 
 // chrome.runtime.onInstalled.addListener(() => {
 //   fetchEmail(); // Fetch emails on installation or update
@@ -292,6 +292,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 });
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.event === "contentScriptLoaded") {
+    sendResponse({ success: true });
+  }
+});
 
 function login(email, password) {
   const LOGIN_ENDPOINT = "https://stagingapi.prepai.io/login";
@@ -310,7 +315,7 @@ function login(email, password) {
       if (data.success) {
         // Store the access token in storage
         chrome.storage.local.set(
-          { "response.access_token": data.response.access_token },
+          { access_token: data.response.access_token },
           () => {
             console.log("Access token saved:", data.response.access_token);
           }
@@ -335,38 +340,67 @@ function handleLogout() {
   console.log("Logged out");
 }
 function generateQuestions(formData, sendResponse) {
+  console.log(formData);
+
   const GENERATE_QUESTIONS_ENDPOINT =
-    "https://stagingapi.prepai.io/generateQuestions";
+    "https://stagingapi.prepai.io/generateQuestionsP1";
 
   // Retrieve the access token from storage
-  chrome.storage.local.get(["response.access_token"], (result) => {
-    const accessToken = result["response.access_token"];
+  chrome.storage.local.get(["access_token"], (result) => {
+    const accessToken = result.access_token;
 
     if (accessToken) {
-      const requestOptions = {
-        method: "POST",
-        body: formData,
-        headers: {
-          Authorization: "Bearer " + accessToken,
-        },
-      };
+      // Send a message to the active tab to retrieve the selected text
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        chrome.tabs.sendMessage(
+          tabs[0].id,
+          { event: "getSelectedText" },
+          (response) => {
+            const selectedText = response.selectedText;
 
-      fetch(GENERATE_QUESTIONS_ENDPOINT, requestOptions)
-        .then((response) => response.json())
-        .then((data) => {
-          console.log(data);
-          sendResponse(data);
-        })
-        .catch((error) => {
-          console.error("Error generating questions:", error);
-          sendResponse({ success: false });
-        });
+            if (selectedText) {
+              // Include the selected text in the request payload
+              const requestData = {
+                ...formData,
+                content: selectedText,
+              };
+
+              const requestOptions = {
+                method: "POST",
+                body: JSON.stringify(requestData),
+                headers: {
+                  "Content-type": "application/json",
+                  Authorization: "Bearer " + accessToken,
+                },
+              };
+
+              fetch(GENERATE_QUESTIONS_ENDPOINT, requestOptions)
+                .then((response) => response.json())
+                .then((data) => {
+                  console.log(data);
+                  sendResponse(data);
+                })
+                .catch((error) => {
+                  console.error("Error generating questions:", error);
+                  sendResponse({ success: false });
+                });
+            } else {
+              console.error("No text selected");
+              sendResponse({ success: false });
+            }
+          }
+        );
+      });
     } else {
       console.error("Access token not found in storage");
       sendResponse({ success: false });
     }
   });
 }
+
+// ...
+
+// ...
 
 // ...
 

@@ -1,17 +1,15 @@
-document.getElementById("generateButton").addEventListener("click", () => {
-  chrome.runtime.sendMessage(
-    { event: "generateQuestions", formData: yourFormData },
-    (response) => {
-      // Handle the response from the background script
-      console.log(response);
-    }
-  );
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.event === "getSelectedText") {
+    const selectedText = window.getSelection().toString();
+    sendResponse({ selectedText: selectedText });
+  }
 });
-
-// chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-//   if (message.event === "getSelectedText") {
-//     const selectedText = window.getSelection().toString().trim();
-//     sendResponse({ selectedText: selectedText });
+// window.addEventListener("message", (event) => {
+//   if (event.data.event === "getSelectedText") {
+//     const selectedText = window.getSelection().toString();
+//     window.postMessage(
+//       { event: "selectedText", selectedText: selectedText },
+//       "*"
+//     );
 //   }
-//   return true; // Ensure the message port stays open for the response
 // });

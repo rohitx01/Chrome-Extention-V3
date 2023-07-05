@@ -59,29 +59,53 @@ chrome.storage.local.get(["email", "password"], (result) => {
   }
 });
 
-// ...existing code...
-// ...existing code...
+document.getElementById("generateButton").addEventListener("click", () => {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    chrome.tabs.sendMessage(
+      tabs[0].id,
+      { event: "getSelectedText" },
+      (response) => {
+        if (chrome.runtime.lastError) {
+          console.error(chrome.runtime.lastError);
+          return;
+        }
 
-const generateButton = document.getElementById("generateButton");
+        const selectedText = response.selectedText;
 
-// Add event listener for click event
-generateButton.onclick = () => {
-  const formData = new FormData();
-  formData.append("topic", "new question paper");
-  formData.append("content", "content you got from web, a long paragraph");
-  formData.append("device", "Chrome Extension");
+        if (selectedText) {
+          chrome.runtime.sendMessage(
+            { event: "generateQuestions", formData: { selectedText } },
+            (response) => {
+              if (chrome.runtime.lastError) {
+                console.error(chrome.runtime.lastError);
+                return;
+              }
 
-  chrome.runtime.sendMessage(
-    { event: "generateQuestions", formData },
-    (response) => {
-      if (response && response.success) {
-        console.log("Questions successfully generated");
-      } else {
-        console.log("Error generating questions");
+              if (response && response.success) {
+                // Questions generated successfully
+                console.log("Questions generated:", response);
+              } else {
+                // Error generating questions
+                console.error("Error generating questions");
+              }
+            }
+          );
+        } else {
+          console.log("No text selected");
+        }
       }
-    }
-  );
-};
+    );
+  });
+});
+
+// ...
+// ...
+
+// ...
+
+// ...
+
+// ...existing code...
 
 // ...existing code...
 
